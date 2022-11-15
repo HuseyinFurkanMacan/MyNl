@@ -91,7 +91,7 @@ for (index; index < argc; index++){
   
 //Boş satır kontrolü ve a_flag kontrolü
 
-  if(strlen(reader)==0 && a_flag==0){
+  if(strlen(reader)==1 && a_flag==0){
   printf("%s",reader);
 
   continue;
@@ -142,20 +142,39 @@ for (index; index < argc; index++){
 
 
 char *read_line(int fpntr){//Satır okuyucu fonksiyon
-  static char line_buff[101];
-  for(int m=0;m<101;m++){
-    line_buff[m]=NULL;
-  }
+  char *line_buff;
+  static int size=INIT_BUFF_SIZE;
+  line_buff=(char*)malloc(INIT_BUFF_SIZE*sizeof(char));
+  
+  
+  
   int line=0;
   
   while((line_buff[line]=read_char(fpntr))!='\n' && line_buff[line]!=EOF){
   line++;
+  
+  if(line>=50){
+    if(line%10==0){
+      size+=INC_BUFF_SIZE*sizeof(char);
+      line_buff=(char *)realloc(line_buff,size);
+      
+     
+    }
+
   }
 
 
-  if((line_buff[line])==EOF)return EOF;
-    line_buff[line]=='\0';
+  }
 
+
+  if((line_buff[line])==EOF){
+    for(int m=0;m<512*sizeof(char);m++){
+    
+    line_buff[m]=NULL;
+  }
+    free(line_buff); return EOF;}
+    line_buff[line]=='\0';
+    size=INIT_BUFF_SIZE*sizeof(char);
     return line_buff;
     
 }
@@ -168,7 +187,7 @@ int read_char(int fpntr){//Bir önbelleğe karakter doldurup read_line a döndü
   static int nread=0;
   
   if(point==nread){
-  if((nread=read(fpntr,&file_buff,512*sizeof(char)))<0){fprintf(stderr,"Problem reading from file");exit(EXIT_FAILURE); } 
+  if((nread=read(fpntr,&file_buff,FILE_BUFFER_SIZE*sizeof(char)))<0){fprintf(stderr,"Problem reading from file");exit(EXIT_FAILURE); } 
   
 
   point=0;
